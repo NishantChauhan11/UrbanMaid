@@ -52,6 +52,7 @@ exports.createBooking = async (req, res) => {
       req.flash('error_msg', 'Helper not found');
       return res.redirect('back');
     }
+    // Only allow booking if helper is available
     if (helper.availability !== 'available') {
       req.flash('error_msg', 'Helper not available');
       return res.redirect('back');
@@ -70,6 +71,7 @@ exports.createBooking = async (req, res) => {
       req.flash('error_msg', 'Helper profile is incomplete. Cannot book.');
       return res.redirect('back');
     }
+
     let hour24 = hourNum;
     if (ampm === 'PM' && hour24 !== 12) hour24 += 12;
     if (ampm === 'AM' && hour24 === 12) hour24 = 0;
@@ -82,6 +84,7 @@ exports.createBooking = async (req, res) => {
       city: city.trim(),
       pincode: pincode ? pincode.trim() : 'Not specified'
     };
+
     const booking = new Booking({
       userId,
       helperId,
@@ -95,8 +98,11 @@ exports.createBooking = async (req, res) => {
       address,
       specialInstructions: instructions ? instructions.trim() : ''
     });
+
     const savedBooking = await booking.save();
+    // Set helper status to busy
     await Helper.findByIdAndUpdate(helperId, { availability: 'busy' });
+
     req.flash('success_msg', 'Booking created');
     res.redirect(`/booking/confirmation/${savedBooking._id}`);
   } catch (err) {
@@ -141,6 +147,7 @@ exports.showLatestConfirmation = async (req, res) => {
   }
 };
 
+// Mark booking complete and free helper
 exports.updateBookingStatus = async (req, res) => {
   try {
     const { status } = req.body;
@@ -149,7 +156,7 @@ exports.updateBookingStatus = async (req, res) => {
     if (!booking) return res.status(404).render('error', { error: 'Booking not found' });
     booking.status = status || booking.status;
     await booking.save();
-    if (status === 'completed' && booking.helperId) {
+    if ((status === 'completed' || status === 'cancelled') && booking.helperId) {
       await Helper.findByIdAndUpdate(booking.helperId._id, { availability: 'available' });
     }
     res.json({ message: 'Booking status updated' });
