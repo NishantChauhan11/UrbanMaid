@@ -1,0 +1,65 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title><%= title %></title>
+  <link rel="stylesheet" href="/css/style.css" />
+  <link rel="stylesheet" href="/css/joinashelper.css" />
+</head>
+<body>
+  <%- include('../partials/navbar') %>
+  <div class="center-container">
+    <div class="helper-card">
+      <div class="helper-card-header">
+        <h2>Complete Your Helper Profile</h2>
+        <p>Fill in all fields to join as a Helper</p>
+      </div>
+      <% if (typeof success_msg !== 'undefined') { %>
+        <div class="alert alert-success"><%= success_msg %></div>
+      <% } %>
+      <% if (typeof error_msg !== 'undefined') { %>
+        <div class="alert alert-danger"><%= error_msg %></div>
+      <% } %>
+      <form class="register-form" action="/helper/profile" method="POST" enctype="multipart/form-data">
+        <div class="form-row">
+          <input type="text" name="name" value="<%= user?.name || '' %>" readonly placeholder="Name *" required />
+          <input type="email" name="email" value="<%= user?.email || '' %>" readonly placeholder="Email *" required />
+        </div>
+        <div class="form-row">
+          <input type="text" name="phone" placeholder="Phone *" required />
+          <select name="category" required>
+            <option value="">Select category</option>
+            <option value="maid">Maid</option>
+            <option value="cook">Cook</option>
+            <option value="babysitter">Babysitter</option>
+            <option value="cleaner">Cleaner</option>
+            <option value="plumber">Plumber</option>
+            <option value="electrician">Electrician</option>
+            <option value="gardener">Gardener</option>
+            <option value="driver">Driver</option>
+          </select>
+        </div>
+        <div class="form-row">
+          <input type="number" name="experience" min="0" placeholder="Experience (years)" />
+          <input type="number" name="hourlyRate" min="0" placeholder="Hourly Rate *" required />
+        </div>
+        <div class="form-row">
+          <input type="text" name="area" placeholder="Area *" required />
+          <input type="text" name="city" placeholder="City *" required />
+          <input type="text" name="pincode" placeholder="Pincode *" pattern="\d{6}" title="6-digit pincode" required />
+        </div>
+        <div>
+          <textarea name="description" placeholder="Description"></textarea>
+        </div>
+        <div>
+          <label class="form-section-label">Profile Image</label>
+          <input type="file" name="image" accept="image/*" />
+        </div>
+        <button type="submit" class="register-btn">Update Profile</button>
+      </form>
+    </div>
+  </div>
+  <%- include('../partials/footer') %>
+</body>
+</html>

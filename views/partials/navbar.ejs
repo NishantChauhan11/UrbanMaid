@@ -1,0 +1,65 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <title>UrbanMaid Navbar</title>
+  <link rel="stylesheet" href="/css/navbar.css" />
+  <link rel="stylesheet" href="/css/style.css" />
+</head>
+<body>
+<nav class="main-navbar sticky-navbar">
+  <div class="navbar-flex-row">
+    <a href="/" class="navbar-logo-brand">
+      <span class="nav-brand-emoji" style="font-size:1.4em; margin-right:0.35em;">🏠</span>
+      <span class="brand-title">UrbanMaid</span>
+    </a>
+    <form class="navbar-search" action="/search" method="get">
+      <input type="text" name="q" placeholder="Search services..." />
+      <button type="submit">&#128269;</button>
+    </form>
+    <div class="navbar-menu">
+      <a href="/" class="navbar-link"><span class="nav-icon">🏠</span> Home</a>
+      <div class="navbar-dropdown">
+        <button type="button" class="navbar-link dropdown-btn">
+          <span class="nav-icon">🗂️</span> Categories <span class="dropdown-arrow">&#9662;</span>
+        </button>
+        <div class="dropdown-content">
+          <a href="/category/maid" class="dropdown-item">🧹 Maids</a>
+          <a href="/category/cook" class="dropdown-item">🍳 Cooks</a>
+          <a href="/category/babysitter" class="dropdown-item">👶 Babysitters</a>
+          <a href="/category/cleaner" class="dropdown-item">🧽 Cleaners</a>
+          <a href="/category/plumber" class="dropdown-item">🔧 Plumbers</a>
+          <a href="/category/electrician" class="dropdown-item">💡 Electricians</a>
+          <a href="/category/gardener" class="dropdown-item">🌳 Gardeners</a>
+          <a href="/category/driver" class="dropdown-item">🚗 Drivers</a>
+        </div>
+      </div>
+
+      <% if (isAuthenticated && user && user.role === 'helper') { %>
+        <% if (typeof userProfileComplete !== 'undefined' && !userProfileComplete) { %>
+          <a href="/helper/profile" class="navbar-link" style="color:#297c35;font-weight:bold;">
+            <span class="nav-icon">📝</span> Join as Helper
+          </a>
+        <% } %>
+        <a href="/helper/dashboard" class="navbar-link"><span class="nav-icon">👤</span> Dashboard</a>
+      <% } %>
+      <% if (isAuthenticated && user && user.role === 'user') { %>
+        <a href="/booking" class="navbar-link"><span class="nav-icon">📒</span> My Booking</a>
+      <% } %>
+      <% if (isAuthenticated && user && user.role === 'admin') { %>
+        <a href="/admin/dashboard" class="navbar-link"><span class="nav-icon">🛡️</span> Admin Dashboard</a>
+      <% } %>
+      <% if (!isAuthenticated) { %>
+        <a href="/auth/login" class="navbar-link login-btn"><span class="nav-icon">🔐</span> Login</a>
+      <% } else { %>
+        <% if(user && user.name){ %>
+          <span class="navbar-user">Welcome! <%= user.name %></span>
+        <% } %>
+        <a href="/auth/logout" class="navbar-link logout-btn"><span class="nav-icon">🚪</span> Logout</a>
+      <% } %>
+    </div>
+  </div>
+</nav>
+</body>
+</html>
