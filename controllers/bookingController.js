@@ -1,122 +1,84 @@
 const Booking = require('../models/Booking');
 const Helper = require('../models/Helper');
 
-// Show booking form for a helper
-exports.showBookingForm = async (req, res) => {
+// Render booking form for a helper
+exports.renderBookingForm = async (req, res) => {
   try {
-    const helper = await Helper.findById(req.params.helperID);
-    if (!helper) {
-      req.flash('error_msg', 'Helper not found');
-      return res.redirect('/category');
+    const helper = await Helper.findById(req.params.helperId);
+    if (!helper) return res.status(404).render('error', { error: 'Helper not found' });
+    // Only allow booking for helpers that completed profiles
+    const isProfileComplete = (
+      helper.phone &&
+      helper.category &&
+      helper.hourlyRate &&
+      helper.location &&
+      helper.location.area &&
+      helper.location.city &&
+      helper.location.pincode
+    );
+    if (!isProfileComplete) {
+      return res.status(400).render('error', { error: 'Helper profile incomplete. Cannot book.' });
     }
-    if (helper.availability !== 'available') {
-      req.flash('error_msg', 'This helper is currently not available');
-      return res.redirect(`/category/${helper.category}`);
-    }
-    res.render('booking/create', { 
-      title: `Book ${helper.name} - UrbanMaid`,
-      helper,
-      error: null,
-      formData: {} // Always send formData (empty on first load)
-    });
+    res.render('booking/create', { helper, user: req.session.user });
   } catch (err) {
-    console.error('Error loading booking form:', err);
-    req.flash('error_msg', 'Error loading booking page');
-    return res.redirect('/category');
+    res.status(500).render('error', { error: 'Could not load booking form' });
   }
 };
 
-// Create a booking
 exports.createBooking = async (req, res) => {
   try {
-    const { 
-      helperID, 
-      bookingDate, 
-      startHour, 
-      startMinute, 
-      ampm, 
-      duration, 
-      street, 
-      area, 
-      city, 
-      pincode, 
-      instructions 
-    } = req.body;
-
-    // Validate required fields
-    if (!helperID || !bookingDate || !startHour || !startMinute || !ampm || !duration) {
-      const helper = await Helper.findById(helperID);
-      return res.render('booking/create', {
-        helper,
-        title: `Book ${helper ? helper.name : ''} - UrbanMaid`,
-        error: 'Please fill in all required fields including date, time, and duration',
-        formData: req.body // Preserves user's input
-      });
+    const { helperId, bookingDate, startHour, startMinute, ampm, duration, street, area, city, pincode, instructions } = req.body;
+    const userId = req.session.user?._id;
+    if (!userId) {
+      req.flash('error_msg', 'User not authenticated');
+      return res.redirect('/auth/login');
     }
-
-    // Validate address fields
-    if (!street || !city) {
-      const helper = await Helper.findById(helperID);
-      return res.render('booking/create', {
-        helper,
-        title: `Book ${helper ? helper.name : ''} - UrbanMaid`,
-        error: 'Please provide at least street address and city',
-        formData: req.body
-      });
+    if (!helperId || !bookingDate || !startHour || !startMinute || !ampm || !duration || !street || !city) {
+      req.flash('error_msg', 'Missing required fields');
+      return res.redirect('back');
     }
-
-    // Validate time format
     const hourNum = parseInt(startHour);
     const minuteNum = parseInt(startMinute);
-    
     if (hourNum < 1 || hourNum > 12 || minuteNum < 0 || minuteNum > 59) {
-      const helper = await Helper.findById(helperID);
-      return res.render('booking/create', {
-        helper,
-        title: `Book ${helper ? helper.name : ''} - UrbanMaid`,
-        error: 'Please enter a valid time (1-12 hours, 0-59 minutes)',
-        formData: req.body
-      });
+      req.flash('error_msg', 'Invalid time');
+      return res.redirect('back');
     }
-
-    // Validate pincode if provided
-    if (pincode && (!/^\d{6}$/.test(pincode))) {
-      const helper = await Helper.findById(helperID);
-      return res.render('booking/create', {
-        helper,
-        title: `Book ${helper ? helper.name : ''} - UrbanMaid`,
-        error: 'Pincode must be exactly 6 digits',
-        formData: req.body
-      });
+    if (pincode && !/^\d{6}$/.test(pincode)) {
+      req.flash('error_msg', 'Pincode must be 6 digits');
+      return res.redirect('back');
     }
-
-    const helper = await Helper.findById(helperID);
+    const helper = await Helper.findById(helperId);
     if (!helper) {
       req.flash('error_msg', 'Helper not found');
-      return res.redirect('/category');
+      return res.redirect('back');
     }
+    // Only allow booking if helper is available
     if (helper.availability !== 'available') {
-      req.flash('error_msg', 'This helper is currently not available');
-      return res.redirect(`/category/${helper.category}`);
+      req.flash('error_msg', 'Helper not available');
+      return res.redirect('back');
+    }
+    // Ensure profile is complete before booking
+    const isProfileComplete =
+      helper.phone &&
+      helper.category &&
+      helper.hourlyRate &&
+      helper.location &&
+      helper.location.area &&
+      helper.location.city &&
+      helper.location.pincode;
+
+    if (!isProfileComplete) {
+      req.flash('error_msg', 'Helper profile is incomplete. Cannot book.');
+      return res.redirect('back');
     }
 
-    // Format time for storage (12-hour to 24-hour conversion for consistency)
-    let hour24 = parseInt(startHour);
-    if (ampm === 'PM' && hour24 !== 12) {
-      hour24 += 12;
-    } else if (ampm === 'AM' && hour24 === 12) {
-      hour24 = 0;
-    }
-    
+    let hour24 = hourNum;
+    if (ampm === 'PM' && hour24 !== 12) hour24 += 12;
+    if (ampm === 'AM' && hour24 === 12) hour24 = 0;
     const formattedTime = `${hour24.toString().padStart(2, '0')}:${startMinute.padStart(2, '0')}`;
-    
-    // For display purposes, also store the original 12-hour format
     const displayTime = `${startHour.padStart(2, '0')}:${startMinute.padStart(2, '0')} ${ampm}`;
-
     const totalAmount = helper.hourlyRate * Number(duration);
-
-    // Create comprehensive address object
-    const addressObj = {
+    const address = {
       street: street.trim(),
       area: area ? area.trim() : 'Not specified',
       city: city.trim(),
@@ -124,150 +86,125 @@ exports.createBooking = async (req, res) => {
     };
 
     const booking = new Booking({
-      userID: req.session.user.id,
-      helperID,
+      userId,
+      helperId,
       bookingDate: new Date(bookingDate),
-      startTime: displayTime, // Store user-friendly format
-      startTime24: formattedTime, // Store 24-hour format for internal use
+      startTime: displayTime,
+      startTime24: formattedTime,
       duration: Number(duration),
       totalAmount,
       status: 'confirmed',
       paymentStatus: 'pending',
-      address: addressObj,
+      address,
       specialInstructions: instructions ? instructions.trim() : ''
     });
 
     const savedBooking = await booking.save();
-    await Helper.findByIdAndUpdate(helperID, { availability: 'busy' });
+    // Set helper status to busy
+    await Helper.findByIdAndUpdate(helperId, { availability: 'busy' });
 
-    console.log(`Booking created: ${savedBooking._id} for ${displayTime} on ${bookingDate}`);
-    req.flash('success_msg', 'Booking created successfully!');
-    return res.redirect(`/booking/confirmation/${savedBooking._id}`);
+    req.flash('success_msg', 'Booking created');
+    res.redirect(`/booking/confirmation/${savedBooking._id}`);
   } catch (err) {
-    console.error('Error creating booking:', err);
-    let helper = null;
-    if (req.body.helperID) {
-      try {
-        helper = await Helper.findById(req.body.helperID);
-      } catch (helperError) {
-        console.error('Error fetching helper for error page:', helperError);
-      }
-    }
-    return res.render('booking/create', {
-      helper,
-      title: `Book ${helper ? helper.name : ''} - UrbanMaid`,
-      error: 'Failed to create booking. Please check your information and try again.',
-      formData: req.body // Always send formData, even on error
-    });
+    req.flash('error_msg', 'Could not create booking');
+    res.redirect('back');
   }
 };
 
-// Show booking confirmation
 exports.showConfirmation = async (req, res) => {
   try {
-    const booking = await Booking.findById(req.params.bookingID)
-      .populate('helperID')
-      .populate('userID');
-
-    if (!booking) {
-      req.flash('error_msg', 'Booking not found');
-      return res.redirect('/');
+    const booking = await Booking.findById(req.params.bookingId)
+      .populate('helperId')
+      .populate('userId');
+    if (!booking) return res.status(404).render('error', { error: 'Booking not found' });
+    if (req.session.user && String(booking.userId._id) !== String(req.session.user._id)) {
+      return res.status(403).render('error', { error: 'Access denied for this booking' });
     }
-    if (String(booking.userID._id) !== String(req.session.user.id)) {
-      req.flash('error_msg', 'You can only view your own bookings');
-      return res.redirect('/');
+    if (!booking.helperId) {
+      return res.status(404).render('error', { error: 'Helper info missing' });
     }
-    if (!booking.helperID) {
-      req.flash('error_msg', 'Helper information not available');
-      return res.redirect('/');
-    }
-
-    const formattedBooking = {
-      ...booking.toObject(),
-      bookingDate: booking.bookingDate instanceof Date
-        ? booking.bookingDate.toLocaleDateString('en-IN', { year: 'numeric', month: 'long', day: 'numeric' })
-        : booking.bookingDate
-    };
-
-    return res.render('booking/confirmation', { 
-      title: 'Booking Confirmed - UrbanMaid',
-      booking: formattedBooking,
-      helper: booking.helperID
-    });
+    booking.bookingDate = booking.bookingDate instanceof Date
+      ? booking.bookingDate.toLocaleDateString('en-IN', { year: 'numeric', month: 'long', day: 'numeric' })
+      : booking.bookingDate;
+    res.render('booking/confirmation', { booking, helper: booking.helperId, user: req.session.user });
   } catch (err) {
-    console.error('Error loading confirmation:', err);
-    req.flash('error_msg', 'Error loading booking confirmation');
-    return res.redirect('/');
+    res.status(500).render('error', { error: 'Could not load confirmation' });
   }
 };
 
-// List logged-in user bookings
+exports.showLatestConfirmation = async (req, res) => {
+  try {
+    const userId = req.session.user?._id;
+    if (!userId) return res.status(401).render('error', { error: 'Not authenticated' });
+    const booking = await Booking.findOne({ userId }).sort({ createdAt: -1 }).populate('helperId').populate('userId');
+    if (!booking) return res.status(404).render('error', { error: 'No recent booking' });
+    booking.bookingDate = booking.bookingDate instanceof Date
+      ? booking.bookingDate.toLocaleDateString('en-IN', { year: 'numeric', month: 'long', day: 'numeric' })
+      : booking.bookingDate;
+    res.render('booking/confirmation', { booking, helper: booking.helperId, user: req.session.user });
+  } catch (err) {
+    res.status(500).render('error', { error: 'Could not load confirmation' });
+  }
+};
+
+// Mark booking complete and free helper
+exports.updateBookingStatus = async (req, res) => {
+  try {
+    const { status } = req.body;
+    const bookingId = req.params.bookingId;
+    const booking = await Booking.findById(bookingId).populate('helperId');
+    if (!booking) return res.status(404).render('error', { error: 'Booking not found' });
+    booking.status = status || booking.status;
+    await booking.save();
+    if ((status === 'completed' || status === 'cancelled') && booking.helperId) {
+      await Helper.findByIdAndUpdate(booking.helperId._id, { availability: 'available' });
+    }
+    res.json({ message: 'Booking status updated' });
+  } catch (err) {
+    res.status(500).json({ error: 'Could not update booking' });
+  }
+};
+
 exports.listUserBookings = async (req, res) => {
   try {
-    const bookings = await Booking.find({ userID: req.session.user.id })
-      .populate('helperID')
+    const userId = req.session.user?._id;
+    if (!userId) {
+      return res.status(401).render('error', { error: 'Login required' });
+    }
+    const bookings = await Booking.find({ userId })
+      .populate('helperId')
       .sort({ createdAt: -1 });
-
-    // Format booking dates for display
     const formattedBookings = bookings.map(booking => ({
       ...booking.toObject(),
       bookingDate: booking.bookingDate instanceof Date
-        ? booking.bookingDate.toLocaleDateString('en-IN', { 
-            year: 'numeric', 
-            month: 'short', 
-            day: 'numeric' 
-          })
+        ? booking.bookingDate.toLocaleDateString('en-IN', { year: 'numeric', month: 'short', day: 'numeric' })
         : booking.bookingDate
     }));
-
-    return res.render('booking/my-booking', {
-      title: 'My Bookings - UrbanMaid',
-      bookings: formattedBookings
-    });
+    res.render('booking/list', { bookings: formattedBookings, user: req.session.user });
   } catch (err) {
-    console.error('Error loading user bookings:', err);
-    req.flash('error_msg', 'Failed to load your bookings');
-    return res.redirect('/');
+    res.status(500).render('error', { error: 'Could not load bookings' });
   }
 };
 
-// Cancel a booking
 exports.cancelBooking = async (req, res) => {
   try {
-    const booking = await Booking.findById(req.params.bookingID);
-    if (!booking) {
-      req.flash('error_msg', 'Booking not found');
-      return res.redirect('/booking/my-bookings');
+    const booking = await Booking.findById(req.params.bookingId);
+    if (!booking) return res.status(404).render('error', { error: 'Booking not found' });
+    if (!req.session.user || String(booking.userId) !== String(req.session.user._id)) {
+      return res.status(403).render('error', { error: 'Booking access denied' });
     }
-    if (String(booking.userID) !== String(req.session.user.id)) {
-      req.flash('error_msg', 'You can only cancel your own bookings');
-      return res.redirect('/booking/my-bookings');
-    }
-
-    // Check if booking can be cancelled (not already cancelled or completed)
     if (booking.status === 'cancelled') {
-      req.flash('error_msg', 'This booking is already cancelled');
-      return res.redirect('/booking/my-bookings');
+      return res.status(400).render('error', { error: 'Already cancelled' });
     }
-
     if (booking.status === 'completed') {
-      req.flash('error_msg', 'Cannot cancel a completed booking');
-      return res.redirect('/booking/my-bookings');
+      return res.status(400).render('error', { error: 'Completed booking' });
     }
-
-    // Update booking status and make helper available again
-    await Booking.findByIdAndUpdate(req.params.bookingID, { 
-      status: 'cancelled',
-      cancelledAt: new Date()
-    });
-    await Helper.findByIdAndUpdate(booking.helperID, { availability: 'available' });
-
-    console.log(`Booking cancelled: ${req.params.bookingID}`);
-    req.flash('success_msg', 'Booking cancelled successfully');
-    return res.redirect('/booking/my-bookings');
+    await Booking.findByIdAndUpdate(req.params.bookingId, { status: 'cancelled', cancelledAt: new Date() });
+    await Helper.findByIdAndUpdate(booking.helperId, { availability: 'available' });
+    req.flash('success_msg', 'Booking cancelled');
+    res.redirect('/booking');
   } catch (err) {
-    console.error('Error cancelling booking:', err);
-    req.flash('error_msg', 'Failed to cancel booking');
-    return res.redirect('/booking/my-bookings');
+    req.flash('error_msg', 'Could not cancel booking');
+    res.redirect('/booking');
   }
 };
