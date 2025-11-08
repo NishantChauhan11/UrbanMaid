@@ -1,49 +1,62 @@
-# 🏠 UrbanMaid – Real-Time Domestic Helper Hiring Platform
+# UrbanMaid – Real-Time Domestic Helper Hiring Platform
 
-## 📌 Overview
-UrbanMaid is a **real-time domestic helper hiring platform** that connects users with **maids, cooks, drivers, plumbers, cleaners, babysitters, and other service providers**.  
+UrbanMaid is a web platform that connects households with domestic helpers such as maids, cooks, babysitters, cleaners, and electricians. The platform provides secure login, instant booking, real-time helper availability, and admin monitoring to ensure trust and reliability.
 
-The platform allows users to **register, browse helpers, view profiles, upload images, book services, and manage bookings** in a seamless and responsive environment.  
-It is built using **Node.js, Express.js, MongoDB, and EJS**, with **ImageKit integration** for efficient image handling.
+## ✨ Key Features
+
+### For Users (Customers)
+- Register and login securely
+- Browse helpers by category and location
+- View helper profiles (skills, experience, hourly rate, reviews)
+- Book helpers instantly
+- Check booking history
+- Cancel bookings if needed
+
+### For Helpers
+- Register and manage profile (photo, skills, rate, city)
+- Status updates automatically:
+  - **Active** → Available
+  - **Busy** → When booked
+- View and manage bookings
+
+### For Admin
+- Login with admin privileges
+- View and manage all Users and Helpers
+- Delete any User or Helper if required
+- Monitor helper real-time status (Active / Busy)
+
+## 🔁 Booking Flow
+1. User selects helper and confirms booking  
+2. Helper status changes from **Active → Busy**  
+3. After completion or cancellation, status returns to **Active**  
+4. Prevents double-booking and ensures accuracy
+
+## 🛠 Technology Used
+- **Frontend:** HTML, CSS, EJS, Bootstrap
+- **Backend:** Node.js, Express.js
+- **Database:** MongoDB (Mongoose)
+- **Authentication:** bcryptjs + express-session
+- **Image Handling:** Multer + ImageKit
+- **Deployment:** Render / GitHub
+
+## 🔐 Security
+- Passwords are stored using hashing (bcryptjs)
+- Session-based authentication
+- Role-based access (User / Helper / Admin)
+- Protected routes to prevent unauthorized access
+
+## 🎯 Objective
+To provide a transparent, secure, and easy-to-use platform that modernizes domestic helper hiring and builds trust between households and helpers.
+
+## 👨‍🏫 Academic Details
+**GLA University, Mathura**  
+Department of Computer Science & Engineering  
+Mentor: *Mr. Jay Pratap Singh*
+
+## 👥 Team Members
+- **Anurag Sharma**  
+- **Gopal Sharma**
+- **Nishant Chauhan**  
 
 ---
 
-## ✨ Features
-- 👤 **User Authentication** – Secure login & registration with password hashing  
-- 📂 **Service Categories** – Browse helpers by category (maids, drivers, plumbers, etc.)  
-- 📝 **Helper Profiles** – Each helper has details and profile image  
-- 📅 **Booking System** – Users can create, view, and manage bookings  
-- 📷 **Image Uploads with ImageKit** – Optimized CDN-based image management  
-- 💬 **Flash Messages** – User feedback for actions (login, booking, etc.)  
-- 🔐 **Session Management** – Persistent login sessions  
-- 🎨 **Responsive Design** – Mobile and desktop friendly  
-
----
-
-## 🛠️ Tech Stack
-
-**Frontend**  
-- EJS (templating)  
-- CSS3 / Custom Stylesheets  
-- Bootstrap CDN (optional)  
-
-**Backend**  
-- Node.js  
-- Express.js  
-
-**Database**  
-- MongoDB Atlas  
-- Mongoose ODM  
-
-**Image Handling**  
-- ImageKit → Upload, transform & deliver optimized images  
-
-**Other Tools**  
-- bcryptjs → Password hashing  
-- express-session → Session handling  
-- connect-flash → Flash messages  
-- multer → File upload middleware  
-- method-override → Support PUT & DELETE methods  
-- moment.js → Date/time formatting  
-
-----
