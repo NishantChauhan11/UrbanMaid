@@ -48,15 +48,11 @@ UrbanMaid is a web platform that connects households with domestic helpers such 
 ## 🎯 Objective
 To provide a transparent, secure, and easy-to-use platform that modernizes domestic helper hiring and builds trust between households and helpers.
 
-## 👨‍🏫 Academic Details
-**GLA University, Mathura**  
-Department of Computer Science & Engineering  
-Mentor: *Mr. Jay Pratap Singh*
-
 ## 👥 Team Members
 - **Anurag Sharma**  
 - **Gopal Sharma**
 - **Nishant Chauhan**  
 
 ---
+
 
