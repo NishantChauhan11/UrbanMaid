@@ -64,10 +64,10 @@
               <td><%= helper.email %></td>
               <td><%= helper.category || '-' %></td>
               <td>
-                <% if(helper.isActive) { %>
-                  <span class="text-success">Active</span>
+                <% if(helper.availability === 'busy') { %>
+                  <span class="text-warning fw-semibold">Busy</span>
                 <% } else { %>
-                  <span class="text-danger">Inactive</span>
+                  <span class="text-success fw-semibold">Active</span>
                 <% } %>
               </td>
               <td>
