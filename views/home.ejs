@@ -1,0 +1,97 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <title>UrbanMaid | Find Trusted Domestic Helpers</title>
+  <link rel="stylesheet" href="/css/style.css" />
+  <link rel="stylesheet" href="/css/home.css" />
+</head>
+<body>
+  <% if (typeof user !== "undefined" && typeof isAuthenticated !== "undefined") { %>
+    <%- include('partials/navbar', { user: user, isAuthenticated: isAuthenticated }) %>
+  <% } else { %>
+    <%- include('partials/navbar') %>
+  <% } %>
+
+  <section class="hero-section">
+    <div class="hero-content">
+      <h1 class="hero-title">
+        Find Trusted <span class="highlight">Domestic Helpers</span>
+      </h1>
+      <p class="hero-sub">
+        Connect with background-verified maids, cooks, babysitters, cleaners, and more—
+        <span class="highlight-text">safe, reliable, and affordable</span> right at your doorstep.
+      </p>
+      <ul class="hero-features">
+        <li><span class="feature-icon verified"></span> 100% verified professionals</li>
+        <li><span class="feature-icon instant"></span> Book instantly, no hidden charges</li>
+        <li><span class="feature-icon reviews"></span> Reliable customer reviews</li>
+      </ul>
+      <a href="/category" class="cta-btn">Browse Services</a>
+    </div>
+  </section>
+
+  <!-- Categories Section -->
+  <section class="categories-section">
+    <h2 class="section-title">Popular Helper Categories</h2>
+    <div class="categories-list">
+      <a href="/category/maid" class="category-card">
+        <span class="category-icon">🧹</span>
+        <span>Maids</span>
+      </a>
+      <a href="/category/cook" class="category-card">
+        <span class="category-icon">🍳</span>
+        <span>Cooks</span>
+      </a>
+      <a href="/category/babysitter" class="category-card">
+        <span class="category-icon">👶</span>
+        <span>Babysitters</span>
+      </a>
+      <a href="/category/cleaner" class="category-card">
+        <span class="category-icon">🧽</span>
+        <span>Cleaners</span>
+      </a>
+      <a href="/category/plumber" class="category-card">
+        <span class="category-icon">🔧</span>
+        <span>Plumbers</span>
+      </a>
+      <a href="/category/electrician" class="category-card">
+        <span class="category-icon">💡</span>
+        <span>Electricians</span>
+      </a>
+      <a href="/category/gardener" class="category-card">
+        <span class="category-icon">🌳</span>
+        <span>Gardeners</span>
+      </a>
+      <a href="/category/driver" class="category-card">
+        <span class="category-icon">🚗</span>
+        <span>Drivers</span>
+      </a>
+    </div>
+  </section>
+
+  <section class="benefits-section">
+    <h2 class="section-title">Why UrbanMaid?</h2>
+    <div class="benefits-list">
+      <div class="benefit-card">
+        <span class="benefit-icon safety"></span>
+        <h3>Background Verified</h3>
+        <p>All helpers are thoroughly verified for your safety and peace of mind.</p>
+      </div>
+      <div class="benefit-card">
+        <span class="benefit-icon easy"></span>
+        <h3>Easy Booking</h3>
+        <p>Book the right professional instantly with upfront pricing and no hidden charges.</p>
+      </div>
+      <div class="benefit-card">
+        <span class="benefit-icon reviews"></span>
+        <h3>Rated by Customers</h3>
+        <p>Choose helpers based on genuine ratings and reviews from our trusted customers.</p>
+      </div>
+    </div>
+  </section>
+
+  <%- include('partials/footer') %>
+</body>
+</html>

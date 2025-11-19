@@ -1,0 +1,85 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <title><%= title %></title>
+  <link rel="stylesheet" href="/css/style.css" />
+  <link rel="stylesheet" href="/css/navbar.css" />
+  <link rel="stylesheet" href="/css/dashboard.css" />
+</head>
+<body>
+  <%- include('../partials/navbar', { user: user }) %>
+  <div class="container mt-5">
+    <h2 class="mb-4"><%= title %></h2>
+    <h4>All Users</h4>
+    <% if (users && users.length === 0) { %>
+      <p>No users found.</p>
+    <% } else { %>
+      <table class="table table-bordered">
+        <thead>
+          <tr>
+            <th>User ID</th>
+            <th>Name</th>
+            <th>Email</th>
+            <th>Actions</th>
+          </tr>
+        </thead>
+        <tbody>
+          <% users.forEach(function(user) { %>
+            <tr>
+              <td><%= user._id %></td>
+              <td><%= user.name %></td>
+              <td><%= user.email %></td>
+              <td>
+                <form action="/admin/delete-user/<%= user._id %>" method="POST" style="display:inline;" onsubmit="return confirm('Delete this user?');">
+                  <button class="btn btn-danger btn-sm" type="submit">Delete</button>
+                </form>
+              </td>
+            </tr>
+          <% }); %>
+        </tbody>
+      </table>
+    <% } %>
+
+    <h4 class="mt-5">All Helpers</h4>
+    <% if (helpers && helpers.length === 0) { %>
+      <p>No helpers found.</p>
+    <% } else { %>
+      <table class="table table-bordered">
+        <thead>
+          <tr>
+            <th>Helper ID</th>
+            <th>Name</th>
+            <th>Email</th>
+            <th>Category</th>
+            <th>Status</th>
+            <th>Actions</th>
+          </tr>
+        </thead>
+        <tbody>
+          <% helpers.forEach(function(helper) { %>
+            <tr>
+              <td><%= helper._id %></td>
+              <td><%= helper.name %></td>
+              <td><%= helper.email %></td>
+              <td><%= helper.category || '-' %></td>
+              <td>
+                <% if(helper.availability === 'busy') { %>
+                  <span class="text-warning fw-semibold">Busy</span>
+                <% } else { %>
+                  <span class="text-success fw-semibold">Active</span>
+                <% } %>
+              </td>
+              <td>
+                <form action="/admin/delete-helper/<%= helper._id %>" method="POST" style="display:inline;" onsubmit="return confirm('Delete this helper?');">
+                  <button class="btn btn-danger btn-sm ms-2" type="submit">Delete</button>
+                </form>
+              </td>
+            </tr>
+          <% }); %>
+        </tbody>
+      </table>
+    <% } %>
+  </div>
+</body>
+</html>
