@@ -29,7 +29,7 @@ It provides **real-time availability**, **instant booking**, **secure login**, a
 - Monitor helper availability  
 - Ensure platform safety and transparency  
 
-## ⚙️ Technology Used
+## ⚙️ Technology Used :-
 - Node.js  
 - Express.js  
 - EJS  
@@ -40,7 +40,7 @@ It provides **real-time availability**, **instant booking**, **secure login**, a
 - Express-Session  
 - CSS / Bootstrap  
 
-## 🔄 How UrbanMaid Works
+## 🔄 How UrbanMaid Works :-
 1. User logs in  
 2. Searches for helpers  
 3. Views helper profile  
@@ -49,19 +49,19 @@ It provides **real-time availability**, **instant booking**, **secure login**, a
 6. After completion/cancellation, helper becomes **Active** again  
 7. User can rate and review  
 
-## 📸 Image Handling
+## 📸 Image Handling :-
 - Helpers upload profile images during registration  
 - Images are stored on **ImageKit CDN**  
 - Application loads images using fast CDN URLs  
 
-## 🎯 Project Goals
+## 🎯 Project Goals :-
 - Provide a clean and easy-to-use hiring platform  
 - Offer real-time helper status  
 - Improve safety through verification and ratings  
 - Support users, helpers, and admins with dashboards  
 - Make domestic helper hiring simple and digital  
 
-## 🚀 Future Enhancements
+## 🚀 Future Enhancements :-
 - Mobile App  
 - In-app chat  
 - AI recommendations  
@@ -69,6 +69,7 @@ It provides **real-time availability**, **instant booking**, **secure login**, a
 - Multi-language support  
 - Analytics dashboard  
 
-## 📌 About
+## 📌 About :-
 This project was created as part of a university assignment to demonstrate a real-time full-stack application.
+
 
