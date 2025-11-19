@@ -3,9 +3,9 @@
 UrbanMaid is a web application that helps users hire domestic helpers such as maids, cooks, babysitters, cleaners, plumbers, electricians, gardeners, and drivers.  
 It provides **real-time availability**, **instant booking**, **secure login**, and **verified ratings** to make the hiring process simple and trustworthy.
 
-## ⭐ Key Features
+## ⭐ Key Features :-
 
-### ✔ User Features
+### ✔ User Features 
 - Create an account and login securely  
 - Browse helpers by category and location  
 - View helper profiles with ratings, reviews, and images  
@@ -71,3 +71,4 @@ It provides **real-time availability**, **instant booking**, **secure login**, a
 
 ## 📌 About
 This project was created as part of a university assignment to demonstrate a real-time full-stack application.
+
