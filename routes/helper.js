@@ -3,15 +3,15 @@ const router = express.Router();
 const Helper = require('../models/Helper');
 const Booking = require('../models/Booking');
 const multer = require('multer');
-const path = require('path');
+const ImageKit = require('imagekit');
 
-const storage = multer.diskStorage({
-  destination: (req, file, cb) => cb(null, 'public/images'),
-  filename: (req, file, cb) => {
-    const uniqueSuffix = Date.now() + '-' + Math.round(Math.random() * 1E9);
-    cb(null, uniqueSuffix + path.extname(file.originalname));
-  }
+const imagekit = new ImageKit({
+  publicKey: process.env.IMAGEKIT_PUBLIC_KEY,
+  privateKey: process.env.IMAGEKIT_PRIVATE_KEY,
+  urlEndpoint: process.env.IMAGEKIT_URL_ENDPOINT
 });
+
+const storage = multer.memoryStorage();
 const upload = multer({ storage });
 
 function isAuthenticated(req, res, next) {
@@ -45,12 +45,10 @@ router.get('/', async (req, res) => {
       isAuthenticated: !!req.session?.user
     });
   } catch (err) {
-    console.error('Failed to load helpers:', err);
     res.status(500).render('error', { error: err.message || 'Could not load helpers.' });
   }
 });
 
-// Show profile completion form
 router.get('/profile', isHelperAuthenticated, (req, res) => {
   res.render('helper/joinashelper', {
     title: 'Complete Your Profile - UrbanMaid',
@@ -58,7 +56,6 @@ router.get('/profile', isHelperAuthenticated, (req, res) => {
   });
 });
 
-// Handle profile completion form submission
 router.post('/profile', isHelperAuthenticated, upload.single('image'), async (req, res) => {
   try {
     const { phone, category, experience, hourlyRate, area, city, pincode, description } = req.body;
@@ -69,7 +66,14 @@ router.post('/profile', isHelperAuthenticated, upload.single('image'), async (re
       req.flash('error_msg', 'Please select a valid category.');
       return res.redirect('/helper/profile');
     }
-    const imageURL = req.file ? '/images/' + req.file.filename : '';
+    let imageURL = '';
+    if (req.file) {
+      const uploadResponse = await imagekit.upload({
+        file: req.file.buffer,
+        fileName: req.file.originalname
+      });
+      imageURL = uploadResponse.url;
+    }
     await Helper.updateOne(
       { _id: req.session.user._id },
       {
@@ -90,12 +94,10 @@ router.post('/profile', isHelperAuthenticated, upload.single('image'), async (re
     req.flash('success_msg', 'Profile completed! You are now a helper.');
     res.redirect('/helper/dashboard');
   } catch (err) {
-    console.error('Error in profile completion POST:', err);
     res.status(500).render('error', { error: err.message || 'Something went wrong. Please try again.' });
   }
 });
 
-// Helper dashboard route
 router.get('/dashboard', isHelperAuthenticated, async (req, res) => {
   try {
     const helper = await Helper.findById(req.session.user._id);
@@ -109,7 +111,6 @@ router.get('/dashboard', isHelperAuthenticated, async (req, res) => {
       helper.location?.area &&
       helper.location?.city &&
       helper.location?.pincode;
-
     if (!isProfileComplete) {
       return res.redirect('/helper/profile');
     }
@@ -121,8 +122,23 @@ router.get('/dashboard', isHelperAuthenticated, async (req, res) => {
       showJoinHelper: false
     });
   } catch (err) {
-    console.error('Error loading helper dashboard:', err);
     res.status(500).render('error', { error: err.message || 'Could not load dashboard.' });
+  }
+});
+
+router.post('/delete-booking/:id', isHelperAuthenticated, async (req, res) => {
+  try {
+    const booking = await Booking.findById(req.params.id);
+    if (!booking || booking.helperId.toString() !== req.session.user._id.toString()) {
+      req.flash('error_msg', 'You cannot delete this booking.');
+      return res.redirect('/helper/dashboard');
+    }
+    await Booking.findByIdAndDelete(req.params.id);
+    req.flash('success_msg', 'Booking deleted successfully.');
+    res.redirect('/helper/dashboard');
+  } catch (err) {
+    req.flash('error_msg', 'Error deleting booking. Please try again.');
+    res.redirect('/helper/dashboard');
   }
 });
 

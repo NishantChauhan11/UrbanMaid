@@ -54,6 +54,9 @@
                   <% } else { %>
                     <span><%= booking.status %></span>
                   <% } %>
+                  <form action="/helper/delete-booking/<%= booking._id %>" method="POST" style="display:inline;" onsubmit="return confirm('Delete this booking request?');">
+                    <button class="btn btn-danger btn-sm ms-2" type="submit">Delete</button>
+                  </form>
                 </td>
               </tr>
             <% }); %>

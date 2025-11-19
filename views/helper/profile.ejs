@@ -8,13 +8,11 @@
   <link rel="stylesheet" href="/css/style.css" />
 </head>
 <body>
-  <!-- Navbar -->
   <%- include('../partials/navbar', { user: user }) %>
 
   <main class="py-5" style="min-height: 100vh; background: linear-gradient(120deg,#e0eefc 0%,#bad1ee 100%) no-repeat fixed;">
     <div class="container d-flex justify-content-center align-items-center h-100">
       <div class="profile-card shadow border-0 w-100" style="max-width:420px; border-radius:20px; position:relative; padding-top:3.6em;">
-        <!-- Badge -->
         <span class="profile-card-available <%= helper.availability === 'available' ? '' : 'profile-card-unavailable' %>">
           <%= helper.availability === 'available' ? 'Available' : 'Busy' %>
         </span>
@@ -38,7 +36,7 @@
             </h2>
           </header>
           <div class="mb-2">
-            <img src="<%= helper.imageURL || '/images/default-user.png' %>" alt="Profile photo of <%= helper.name %>" class="rounded-circle shadow profile-card-photo" />
+            <img src="<%= helper.imageURL || 'https://ik.imagekit.io/YOUR_IMAGEKIT_ID/default-user.png' %>" alt="Profile photo of <%= helper.name %>" class="rounded-circle shadow profile-card-photo" style="height:100px;width:100px;object-fit:cover;">
           </div>
           <h2 class="fw-bold text-primary mb-2 fs-5"><%= helper.name %></h2>
           <div class="mb-1 text-warning small" aria-label="Rating">
